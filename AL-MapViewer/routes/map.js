@@ -94,8 +94,13 @@ module.exports = async (req, res) => {
         uniqueMonsters.sort((a, b) => a.Name.localeCompare(b.Name) );
     }
 
+    let baseUrl = `${req.protocol}://${req.get("host")}/`;
+
+    if(process.env.BASE_URL)
+        baseUrl = process.env.BASE_URL;
+
     res.render("mapPage", {
-        baseUrl: `${req.protocol}://${req.get("host")}/`,
+        baseUrl: baseUrl,
         server: server,
         map: map,
         mapX: mapX,

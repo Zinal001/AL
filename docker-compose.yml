@@ -4,6 +4,8 @@ services:
   mapViewer:
     image: ${DOCKER_REGISTRY-}mapviewer
     restart: unless-stopped
+    environment:
+        BASE_URL: "https://almapx.zinals.tech/"
     build:
       context: ./AL-MapViewer
       dockerfile: ./Dockerfile

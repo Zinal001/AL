@@ -25,8 +25,13 @@ module.exports = async (req, res) => {
         npc = await db.npc(id, map.Id);
     }
 
+    let baseUrl = `${req.protocol}://${req.get("host")}/`;
+
+    if(process.env.BASE_URL)
+        baseUrl = process.env.BASE_URL;
+
     res.render("npcPage", {
-        baseUrl: `${req.protocol}://${req.get("host")}/`,
+        baseUrl: baseUrl,
         server: server,
         map: map,
         npc: npc
