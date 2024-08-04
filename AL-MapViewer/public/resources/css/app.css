@@ -18,7 +18,13 @@ html, body
     border:none;
 }
 
-.hidden
+.hidden,
+#sidebar.hidden
 {
-    display:none;
+    display:none !important;
+}
+
+#sidebar
+{
+    overflow:auto;
 }
