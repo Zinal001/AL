@@ -1,0 +1,7 @@
+<div style="display:inline-block; position:relative; margin:2px; border:2px solid gray; height:46px; width:46px; background:black; vertical-align: top;">
+    <div style="background:black; position:absolute; bottom:-2px; left:-2px; border:2px solid gray; padding:3px; overflow:hidden;">
+        <div class="<%= itemClassName _%>" data-id="<%= item.ItemId _%>" data-item_name="<%= item.Name _%>" style="overflow: hidden; height:<%= item.Size * 2 _%>px; width:<%= item.Size * 2 _%>px;">
+            <img src="<%= baseUrl _%>servers/Server_<%= server.Id _%>/ImageSets/<%= item.ImageSetName _%>.png" style="width:<%= item.Width * 2 _%>px; height:<%= item.Height * 2 _%>px; margin-left:<%= item.X * -item.Size * 2 _%>px; margin-top:<%= item.Y * -item.Size * 2 _%>px;" alt="" draggable="false" />
+        </div>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MapGenerator": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

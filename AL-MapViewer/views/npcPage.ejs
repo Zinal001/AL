@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>AL - MapViewer</title>
+
+        <style type="text/css">
+            @font-face {
+                font-family: pixel;
+                src: url("<%= baseUrl %>resources/fonts/m5x7.ttf");
+                font-weight: normal;
+                font-style: normal
+            }
+        </style>
+
+        <link rel="stylesheet" href="<%= baseUrl %>resources/css/app.css" />
+        <link rel="stylesheet" href="<%= baseUrl %>resources/css/npc.css" />
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="<%= baseUrl %>resources/js/app.js"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function(){
+
+                $(".item[data-id]").on("click", function(){
+                    let id = $(this).attr("data-id");
+                    window.open(`<%= server.Url _%>/docs/guide/all/items/${id}`, null, "menubar=no,toolbar=no,location=no,status=no,width=500,height=800");
+                });
+
+                $("#npc_pos").on("click", async function() {
+                    let x = $(this).attr("data-x");
+                    let y = $(this).attr("data-y");
+                    let mapName = $(this).attr("data-mapName");
+
+                    if(Navigator.clipboard)
+                    {
+                        try
+                        {
+                            await Navigator.clipboard.writeText(`smart_move({x: ${x}, y: ${y}, map: ${mapName});`);
+                        }
+                        catch(ex)
+                        {
+                            console.log("Clipboard failed", ex);
+                        }
+                    }
+
+                });
+            });
+        </script>
+
+    </head>
+    <body>
+        <% if(npc == null) { %>
+            <p>Invalid npc specified</p>
+        <% } else { %>
+            <div id="npc-container">
+                <div style="text-align:center; vertical-align: middle;">
+                    <img style="display:inline; width:30%; background:#464973; border:2px solid gray;" src="<%= baseUrl _%>servers/Server_<%= server.Id _%>/Skins/<%= npc.SkinFilename _%>.png" alt="" draggable="false" />
+                </div>
+                <div style="vertical-align: middle;">
+                    <span style="color:grey;">Name:</span> <%= npc.Name _%>
+                </div>
+                <div style="display:flex; flex-direction: row; margin-top:4px;">
+                    <div style="flex-grow: 1; margin-right: 6px;">
+                        <span style="color: #7F75CA;">Position</span>:
+                    </div>
+                    <div>
+                        <span id="npc_pos" data-x="<%= npc.Positions[0].X _%>" data-y="<%= npc.Positions[0].X _%>" data-mapName="<%= map.Name _%>" style="color: #EF7A4D;">[<%= npc.Positions[0].X _%>, <%= npc.Positions[0].Y _%>] in <%= map.DisplayName _%></span>
+                        <%_ if(npc.Moves) { _%>
+                            <br /><span style="font-style:italic;">(Moves around)</span>
+                        <%_ } _%>
+                    </div>
+                </div>
+                <%_ if(npc.QuestName) { _%>
+                    <div>
+                        <span style="color:#36B89E"><%= npc.QuestName _%></span>
+                    </div>
+                <%_ } _%>
+
+                <%_ if(npc.TokenItem != null) { _%>
+                <div style="margin-top:6px; margin-bottom:3px; color:#9B60A3;">Exchanges:</div>
+                <div style="white-space: nowrap;" title="<%= npc.TokenItem.Name _%>">
+                    <%- include('itemImage', {item: npc.TokenItem, baseUrl: baseUrl, server: server, itemClassName: "item"}) _%>
+                    <div style="margin-left:3px; vertical-align: middle; display:inline-block; font-size:24px; line-height: 48px;">
+                        <span style="color:#93A6A2; vertical-align: middle;"><%= npc.TokenItem.Name _%></span>
+                    </div>
+                </div>
+                <%_ } _%>
+                <%_ if(npc.Items != null && npc.Items.length > 0) { _%>
+                    <div style="margin-top:6px; margin-bottom:3px; color:#2A9A3D;">Sells:</div>
+                    <%_ npc.Items.filter(i => i.Cost > 0).sort((a, b) => a.Cost - b.Cost).forEach((i) => { _%>
+                        <div style="white-space: nowrap;" title="<%= i.Name _%>">
+                            <%- include('itemImage', {item: i, baseUrl: baseUrl, server: server, itemClassName: "item"}) _%>
+                            <div style="vertical-align: middle; display: inline-block; font-size:24px; line-height: 24px;">
+                                <span style="color:#93A6A2;"><%= i.Name _%></span><br />
+                                <%_ if(i.Cost > 0) { _%>
+                                    <span style="color:#A28D4C;">Cost:</span>
+                                    <span style="color: <%= i.CurrencyType == "GOLD" ? "gold" : "#9B60A3" _%>;"><%= i.Cost.toLocaleString("en") %> <%= i.CurrencyType == "GOLD" ? "GOLD" : "TOKENS" _%></span>
+                                <%_ } _%>
+                            </div>
+                        </div>
+                    <%_ }); _%>
+                <%_ } _%>
+            </div>
+        <% } %>
+    </body>
+</html>

@@ -1,0 +1,76 @@
+version: '3.4'
+
+services:
+  mapViewer:
+    image: ${DOCKER_REGISTRY-}mapviewer
+    restart: unless-stopped
+    build:
+      context: ./AL-MapViewer
+      dockerfile: ./Dockerfile
+    volumes:
+        - resources:/usr/src/app/public/servers/
+    networks:
+        - backend
+        - frontend
+    ports:
+        - "3000:3000"
+    depends_on:
+        db:
+            condition: service_healthy
+            restart: true
+
+  mapgenerator:
+    image: ${DOCKER_REGISTRY-}mapgenerator
+    restart: unless-stopped
+    build:
+        context: ./MapGenerator
+        dockerfile: ./Dockerfile
+    command: "-interval=2 -scale=h"
+    networks:
+        - backend
+        - frontend
+    volumes:
+        - resources:/resources
+    depends_on:
+        db:
+            condition: service_healthy
+            restart: true
+  db:
+    image: mongo
+    command: mongod --quiet
+    restart: always
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: admin
+        MONGO_INITDB_ROOT_PASSWORD: password
+        MONGO_INITDB_DATABASE: admin
+    volumes:
+        - db_data:/data/db
+        - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+        - ./mongod.conf:/etc/mongod.conf:ro
+    networks:
+        - backend
+    healthcheck:
+      test: ["CMD","mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+networks:
+  backend:
+    internal: true
+  frontend:
+
+volumes:
+  resources:
+    driver: local
+    driver_opts:
+        type: 'none'
+        o: 'bind'
+        device: './Data/Resources'
+  db_data:
+    driver: local
+    driver_opts:
+        type: 'none'
+        o: 'bind'
+        device: './Data/DB'

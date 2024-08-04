@@ -1,0 +1,329 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>AL - MapViewer</title>
+
+        <link rel="stylesheet" href="<%= baseUrl %>resources/bootstrap/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="<%= baseUrl %>resources/css/app.css" />
+        <link rel="stylesheet" href="<%= baseUrl %>resources/css/map.css" />
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="<%= baseUrl %>resources/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script type="text/javascript" src="<%= baseUrl %>resources/js/app.js"></script>
+
+        <script type="text/javascript">
+            function navigateTo(mapName, toX = 0, toY = 0, serverId = null)
+            {
+                let query = [];
+                let anyQuery = false;
+
+                $(".show-control").each(function(){
+
+                    if($(this).is(":checked"))
+                    {
+                        query[$(this).attr("data-p")] = "1";
+                        anyQuery = true;
+                    }
+                });
+
+                let mons = [];
+                $(".show-monster-control").each(function(){
+                    if($(this).is(":checked"))
+                    {
+                        mons.push(`m=${$(this).attr("data-type")}`);
+                        anyQuery = true;
+                    }
+                });
+
+                let queryStr = "";
+
+                if(anyQuery)
+                {
+                    queryStr = "?";
+                    let parts = [];
+                    for(let k in query)
+                        parts.push(`${k}=${query[k]}`);
+                    for(let m of mons)
+                        parts.push(m);
+                    queryStr += parts.join("&");
+                }
+
+                if(serverId == null || serverId === "")
+                    serverId = "<%= server == null ? "Default" : server.ServerKey _%>";
+
+                window.location.href = `<%= baseUrl _%>map/${mapName}/${toX}/${toY}/${serverId}${queryStr}`;
+            }
+
+            $(document).ready(function(){
+                $("#goto-map-button").on("click", function(e){
+                    e.preventDefault();
+
+                    let selMap = $("#map-select").val();
+
+                    navigateTo(selMap);
+                });
+
+                $("#goto-server-button").on("click", function(e){
+                    e.preventDefault();
+
+                    let selServer = $("#server-select").val();
+
+                    navigateTo("<%= map == null ? "main" : map.Name _%>", 0, 0, selServer);
+                });
+            });
+        </script>
+
+        <% if(server != null && map != null) { %>
+            <script type="text/javascript" src="<%= baseUrl %>resources/js/panzoom-9.4.0.min.js"></script>
+            <script type="text/javascript">
+                $(document).ready(function(){
+                    const MAP_MIN_X = <%= map.MinMapX %>;
+                    const MAP_MIN_Y = <%= map.MinMapY %>;
+
+
+                    function transformPointToMap(point) {
+                        let ctm = scene[0].getScreenCTM();
+                        let p = svg[0].createSVGPoint();
+                        p.x = point.x;
+                        p.y = point.y;
+                        p = p.matrixTransform(ctm.inverse());
+
+                        p.x = Math.round(p.x + MAP_MIN_X);
+                        p.y = Math.round(p.y + MAP_MIN_Y);
+
+                        return p;
+                    }
+
+                    function panToMap(x, y)
+                    {
+                        let p = transformPointToMap({x: x, y: y});
+                        panToDisplay(p.x, p.y);
+                    }
+
+                    function panToDisplay(x, y)
+                    {
+                        panScene.moveTo(x + $("#map-view").innerWidth() / 2, y + $("#map-view").innerHeight() / 2);
+                    }
+
+                    const scene = $("#scene");
+                    const svg = $("#svg");
+
+                    const panScene = panzoom(scene[0], {bound: true});
+
+                    scene.on("mousemove", function (e) {
+                        let p = transformPointToMap({ x: e.offsetX, y: e.offsetY });
+                        $("#pos_x").html(p.x);
+                        $("#pos_y").html(p.y);
+                    });
+
+                    $("#show-monsters-button").on("click", function(e){
+                        e.preventDefault();
+
+                        $(".show-monster-control").each(function(){
+                            $(this).prop("checked", "checked");
+                        });
+                    });
+
+                    $("#hide-monsters-button").on("click", function(e){
+                        e.preventDefault();
+
+                        $(".show-monster-control").each(function(){
+                            $(this).prop("checked", false);
+                        });
+                    });
+
+                    $(".show-control").on("change", function(){
+
+                        let checked = $(this).is(":checked");
+                        let target = $(this).attr("data-target");
+
+                        if(checked)
+                            $(target).addClass("visible");
+                        else
+                            $(target).removeClass("visible");
+                    });
+
+                    $(".show-monster-control").on("change", function(){
+                        let checked = $(this).is(":checked");
+                        let type = $(this).attr("data-type");
+
+                        if(checked)
+                            $(`.monster[data-type='${type}']`).addClass("visible");
+                        else
+                            $(`.monster[data-type='${type}']`).removeClass("visible");
+
+                    });
+
+                    $(".door").on("click", function(e){
+                        e.preventDefault();
+
+                        let mapName = $(this).attr("data-map_name");
+                        let toX = $(this).attr("data-to_x");
+                        let toY = $(this).attr("data-to_y");
+
+                        navigateTo(mapName, toX, toY);
+                    });
+
+                    $(".npc").on("click", function(){
+                        let id = $(this).attr("data-id");
+                        window.open(`<%= baseUrl _%>npc/${id}/<%= map.Name _%>/<%= server.ServerKey _%>`, "NPC Information", "menubar=no,toolbar=no,location=no,status=no,width=400,height=800");
+                    });
+
+                    $(".monster image").on("click", function(){
+                        let t = $(this).attr("data-type");
+                        window.open(`<%= server.Url _%>/docs/guide/all/monsters/${t}`, "Monster Information", "menubar=no,toolbar=no,location=no,status=no,width=400,height=800");
+                    });
+
+                    $("#monsters-toggle-button").on("click", function(){
+
+                        if($("#monsters-list").hasClass("hidden"))
+                        {
+                            $(this).html("▲");
+                            $("#monsters-list").removeClass("hidden");
+                        }
+                        else
+                        {
+                            $(this).html("▼");
+                            $("#monsters-list").addClass("hidden");
+                        }
+
+                    });
+
+                    panToMap(<%= -mapX %>, <%= -mapY %>);
+
+                });
+            </script>
+        <% } %>
+
+    </head>
+    <body>
+        <button id="sidebar-toggle" style="position:absolute; top:10px; right:10px;" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="row gx-0" style="height:100%;">
+            <div class="col" style="height:100%;">
+                <% if(server == null) { %>
+                    <div class="d-flex align-items-center justify-content-center" style="width:100%; height:100%; background:black;">
+                        <div style="background:yellow; color:black;" class="p-3">
+                            <span>Server not found</span>
+                        </div>
+                    </div>
+                <% } else if(map == null) { %>
+                        <div class="d-flex align-items-center justify-content-center" style="width:100%; height:100%; background:black;">
+                            <div style="background:yellow; color:black;" class="p-3">
+                                <span>Map not found</span>
+                            </div>
+                        </div>
+                <% } else { %>
+                    <%- include('mapPartial'); %>
+                <% } %>
+            </div>
+
+            <div id="sidebar" class="col-2 d-flex flex-column" style="height:100%;">
+                <div class="text-bg-primary text-white p-2 d-flex" style="background-color:#009688 !important;">
+                    <h4 class="flex-grow-1">Map Viewer</h4>
+                </div>
+                <div class="mx-2">
+                    <label for="server-select">Servers:</label>
+                    <select class="form-select" id="server-select">
+                        <%_ allServers.filter(s => s.LastGenerated != null).forEach((s) => { _%>
+                            <option value="<%= s.ServerKey _%>" <%= server != null && s.ServerKey == server.ServerKey ? "selected='selected'" : "" _%> ><%= s.Name _%></option>
+                        <%_ }); _%>
+                    </select>
+                    <button style="width:100%;" class="btn btn-primary mt-2" type="button" id="goto-server-button">Switch server</button>
+                </div>
+
+                <div class="mt-2" style="font-size:1.5rem;">
+                    <div class="mx-2">
+                        <div class="form-check">
+                            <input class="form-check-input show-control" data-p="b" data-target="#bounds" type="checkbox" id="show-bounds" <%= show.bounds ? "checked='checked'" : "" _%> />
+                            <label class="form-check-label sm" for="show-bounds">Show Bounds</label>
+                        </div>
+                    </div>
+                    <div class="mx-2">
+                        <div class="form-check">
+                            <input class="form-check-input show-control" data-p="s" data-target="#spawns" type="checkbox" id="show-spawns" <%= show.spawns ? "checked='checked'" : "" _%> />
+                            <label class="form-check-label sm" for="show-spawns">Show Spawns</label>
+                        </div>
+                    </div>
+                    <div class="mx-2">
+                        <div class="form-check">
+                            <input class="form-check-input show-control" data-p="q" data-target="#quirks" type="checkbox" id="show-quirks" <%= show.quirks ? "checked='checked'" : "" _%> />
+                            <label class="form-check-label sm" for="show-quirks">Show Quirks</label>
+                        </div>
+                    </div>
+                    <div class="mx-2">
+                        <div class="form-check">
+                            <input class="form-check-input show-control" data-p="d" data-target="#doors" type="checkbox" id="show-doors" <%= show.doors ? "checked='checked'" : "" _%> />
+                            <label class="form-check-label sm" for="show-doors">Show Doors</label>
+                        </div>
+                    </div>
+                    <div class="mx-2">
+                        <div class="form-check">
+                            <input class="form-check-input show-control" data-p="n" data-target="#npcs" type="checkbox" id="show-npcs" <%= show.npcs ? "checked='checked'" : "" _%> />
+                            <label class="form-check-label sm" for="show-npcs">Show Npcs</label>
+                        </div>
+                    </div>
+                    <div class="mx-2">
+                        <div class="form-check">
+                            <input class="form-check-input show-control" data-p="z" data-target="#zones" type="checkbox" id="show-zones" <%= show.zones ? "checked='checked'" : "" _%> />
+                            <label class="form-check-label sm" for="show-zones">Show Zones</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mx-2 mt-2 pb-3 bg-secondary text-white">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h4 style="padding:0; margin:0;">Monsters</h4>
+                            </div>
+                            <button class="btn btn-secondary" id="monsters-toggle-button" type="button">▼</button>
+                        </div>
+                    </div>
+                    <div id="monsters-list" class="card-body hidden">
+                        <div style="max-height:200px; overflow-y:auto; resize:vertical;">
+                            <ul class="list-group" style="font-size:1.2rem;">
+                                <%_ uniqueMonsters.forEach((m) => { _%>
+                                    <li class="list-group-item">
+                                        <div class="form-check">
+                                            <input class="form-check-input show-monster-control" data-type="<%= m.Type _%>" type="checkbox" <%= show.monsters.includes(m.Type) ? "checked='checked'" : "" _%> />
+                                            <label class="form-check-label sm"><%= m.Name _%></label>
+                                        </div>
+                                    </li>
+                                <%_ }); _%>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <button class="btn btn-primary" type="button" id="hide-monsters-button">Hide all</button>
+                            </div>
+                            <div class="flex-grow-1 text-end">
+                                <button class="btn btn-primary" type="button" id="show-monsters-button">Show all</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mx-2 mt-3">
+                    <label for="map-select">Maps:</label>
+                    <select class="form-select" id="map-select">
+                        <%_ allMaps.forEach((s) => { _%>
+                            <option value="<%= s.Name _%>" <%= map != null && map.Name == s.Name ? "selected='selected'" : "" _%>><%= s.DisplayName %> (<%= s.Name _%>)</option>
+                        <%_ }); _%>
+                    </select>
+                    <button style="width:100%;" class="btn btn-primary mt-2" type="button" id="goto-map-button">Goto Map</button>
+                </div>
+                <div class="flex-grow-1">
+                    &nbsp;
+                </div>
+                <div class="text-center mb-2" style="font-size:0.8rem;">
+                    <span>All images and data are from <a href="https://adventure.land" target="_blank">Adventure Land</a>.</span><br />
+                    <%_ if(server != null) { _%>
+                    <span>Updated <%= server.LastGenerated == null ? "---------" : server.LastGenerated.toUTCString() _%></span>
+                    <%_ } _%>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

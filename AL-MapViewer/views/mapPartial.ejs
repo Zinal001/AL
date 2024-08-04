@@ -1,0 +1,109 @@
+<div style="width:100%; height:100%;" id="map-view">
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" id="svg" style="width:100%; height: 100%; background:black;">
+        <g id="scene">
+            <image id="map" href="<%= baseUrl %>servers/Server_<%= server.Id %>/Maps/<%= map.Name %>.png" />
+            <image id="bounds" href="<%= baseUrl %>servers/Server_<%= server.Id %>/Maps/<%= map.Name %>_Bounds.png" class="<%= show.bounds ? "visible" : "" _%>" />
+            <g id="quirks" class="<%= show.quirks ? "visible" : "" _%>">
+                <% quirks.forEach((q) => { %>
+                    <rect class="quirk visible" x="<%= q.X %>" y="<%= q.Y %>" width="<%= q.Width %>" height="<%= q.Height %>">
+                        <title><%= q.Text %></title>
+                    </rect>
+                <% }); %>
+            </g>
+            <g id="doors" class="<%= show.doors ? "visible" : "" _%>">
+                <% doors.forEach((d) => { %>
+                    <rect data-map_name="<%= d.ToMapName %>" data-to_x="<%= d.ToX + (d.ToMap == null ? 0 : d.ToMap.MinMapX) %>" data-to_y="<%= d.ToY + (d.ToMap == null ? 0 : d.ToMap.MinMapY) %>" class="door visible" x="<%= d.X %>" y="<%= d.Y %>" width="<%= d.Width %>" height="<%= d.Height %>">
+                        <title>
+                            <% if(d.ToMap != null) { %>
+                                To <%= d.ToMap.DisplayName %> (<%= d.ToX + d.ToMap.MinMapX %>, <%= d.ToY + d.ToMap.MinMapY %>)
+                            <% } else { %>
+                                To <%= d.ToMapName %>
+                            <% } %>
+                        </title>
+                    </rect>
+                <% }); %>
+            </g>
+            <g id="spawns" class="<%= show.spawns ? "visible" : "" _%>">
+                <% spawns.forEach((s) => { %>
+                    <rect class="spawn visible" x="<%= s.X - 8 %>" y="<%= s.Y - 8 %>" width="16" height="16">
+                        <title>
+                            <% if(s.Connections.length > 0) { %>
+                                <%= s.Connections.join(",\n") %>
+                            <% } %>
+                        </title>
+                    </rect>
+                <% }); %>
+            </g>
+            <g id="zones" class="<%= show.zones ? "visible" : "" _%>">
+                <% zones.forEach((z) => { %>
+                    <polygon class="zone" points="<%= z.toSvgPoints() %>">
+                        <title><%= z.Name %></title>
+                    </polygon>
+                <% }); %>
+            </g>
+            <g id="npcs" class="<%= show.npcs ? "visible" : "" _%>">
+                <% npcs.forEach((n) => { %>
+                    <g class="npc" data-id="<%= n.NpcId _%>">
+                        <% if(n.Boundary != null) { %>
+                            <rect x="<%= n.Boundary.X1 %>" y="<%= n.Boundary.Y1 %>" width="<%= n.Boundary.Width %>"  height="<%= n.Boundary.Height %>">
+                                <title><%= n.Name %> moves around in this area.</title>
+                            </rect>
+                        <% } %>
+                        <image href="<%= baseUrl %>servers/Server_<%= server.Id %>/Skins/<%= n.SkinFilename %>.png" x="<%= n.Positions[0].X %>" y="<%= n.Positions[0].Y %>">
+                            <title>
+                                <%= n.Name _%>
+                                <%_ if(n.Says != null && n.Says.length > 0) { _%>
+                                    <%= `\n"${n.Says[Math.floor(Math.random() * n.Says.length)]}"` _%>
+                                <%_ } _%>
+                                <%_ if(n.Moves) { _%>
+                                    <%= `\n(Moves around the map)` _%>
+                                <%_ } _%>
+                                <%_ if(n.QuestName != null && n.QuestName != "") { _%>
+                                    <%= `\nHas Quest: ${n.QuestName}` _%>
+                                <%_ } _%>
+                            </title>
+                        </image>
+                    </g>
+                <% }); %>
+            </g>
+            <g id="monsters">
+                <% monsters.forEach((m) => { %>
+                    <g data-type="<%= m.Type _%>" class="monster <%= show.monsters.includes(m.Type) ? "visible" : "" _%>">
+                        <% m.Boundaries.forEach((b) => { %>
+                            <rect x="<%= b.X1 %>" y="<%= b.Y1 %>" width="<%= b.Width %>" height="<%= b.Height %>">
+                                <title>
+                                    <%= `${m.Name}${(m.Count > 1 ? ` (${m.Count})` : "")}` _%>
+                                    <%_ if(m.SType == "randomrespawn") { _%>
+                                        <%= `\n(Spawn randomly)` _%>
+                                    <%_ } _%>
+                                    <%_ if(m.Roams) { _%>
+                                        <%= `\n(Roams around)` _%>
+                                    <%_ } _%>
+                                </title>
+                            </rect>
+                            <image data-type="<%= m.Type _%>" href="<%= baseUrl %>servers/Server_<%= server.Id %>/Skins/<%= m.SkinFilename %>.png" x="<%= b.X1 + (b.Width / 2) - m.SkinWidth / 2 %>" y="<%= b.Y1 + (b.Height / 2) - m.SkinHeight / 2 %>">
+                                <title>
+                                    <%= `${m.Name}${(m.Count > 1 ? ` (${m.Count})` : "")}` _%>
+                                    <%_ if(m.SType == "randomrespawn") { _%>
+                                        <%= `\n(Spawn randomly)` _%>
+                                    <%_ } _%>
+                                    <%_ if(m.Roams) { _%>
+                                        <%= `\n(Roams around)` _%>
+                                    <%_ } _%>
+                                </title>
+                            </image>
+                        <% }); %>
+                    </g>
+                <% }); %>
+            </g>
+        </g>
+    </svg>
+    <div class="px-4 py-1 d-flex" style="border-radius: 6px; position:absolute; left:10px; bottom:10px; background:rgba(255, 255, 255, 0.8); color:black;">
+        <div class="flex-grow-1" style="min-width:100px;">
+            (<span id="pos_x">0</span>, <span id="pos_y">0</span>)
+        </div>
+        <div class="flex-grow-1">
+            <%= map.DisplayName _%>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,120 @@
+:root
+{
+    --bs-border-color: gray;
+}
+
+#map-view {
+    position: relative;
+}
+
+#sidebar
+{
+    border-left:1px solid white;
+}
+
+#bounds
+{
+    display:none;
+}
+
+#bounds.visible
+{
+    display:block;
+}
+
+.quirk {
+    fill: transparent;
+    stroke: transparent;
+    cursor: help;
+}
+
+#quirks.visible .quirk
+{
+    fill: rgba(0, 255, 0, 0.5);
+    stroke: lime;
+}
+
+.door {
+    fill: transparent;
+    stroke: transparent;
+    cursor: pointer;
+}
+
+#doors.visible .door {
+    fill: rgba(0, 127, 255, 0.5);
+    stroke: blue;
+}
+
+.spawn {
+    fill: transparent;
+    stroke: transparent;
+}
+
+#spawns.visible .spawn {
+    fill: rgba(58, 255, 255, 0.5);
+    stroke: lightblue;
+}
+
+.zone {
+    fill: transparent;
+    stroke: transparent;
+}
+
+#zones.visible .zone {
+    fill: rgba(0, 0, 255, 0.5);
+    stroke: lightblue;
+}
+
+.npc {
+    display: none;
+    cursor: alias;
+}
+
+.npc rect
+{
+    fill: rgba(255, 205, 28, 0.3);
+    stroke:rgba(255, 205, 28, 1);
+    display:none;
+}
+
+.npc:hover rect
+{
+    display:block;
+}
+
+#npcs.visible .npc {
+    display: block;
+}
+
+.monster
+{
+    display:none;
+}
+
+.monster.visible
+{
+    display:block;
+}
+
+.monster rect {
+    fill: rgba(255, 0, 0, 0.3);
+    stroke: red;
+}
+
+.monster image {
+    cursor: alias;
+}
+
+
+g[data-areahover] rect {
+    display: none;
+}
+
+g[data-areahover]:hover rect {
+    display: block;
+}
+
+.form-check-label.sm
+{
+    font-size:0.8em;
+}

@@ -1,0 +1,37 @@
+html, body
+{
+    font-family: pixel, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+    font-size:24px;
+    color:white;
+    background:#1b1b1b;
+    display:inline-block;
+    text-align: center;
+    line-height: normal !important;
+}
+
+#npc-container
+{
+    display:inline-block;
+    margin-bottom: 40px;
+    margin-top:40px;
+    padding:10px;
+    text-align:left;
+    position: relative;
+    border:5px solid gray;
+    background:black;
+}
+
+img
+{
+    image-rendering: optimizeSpeed;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    image-rendering: pixelated;
+    -ms-interpolation-mode: nearest-neighbor;
+}
+
+.item[data-id]
+{
+    cursor:alias;
+}
