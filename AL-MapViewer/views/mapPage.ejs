@@ -122,6 +122,7 @@
                         $(".show-monster-control").each(function(){
                             $(this).prop("checked", "checked");
                         });
+                        $(".show-monster-control").change();
                     });
 
                     $("#hide-monsters-button").on("click", function(e){
@@ -130,6 +131,7 @@
                         $(".show-monster-control").each(function(){
                             $(this).prop("checked", false);
                         });
+                        $(".show-monster-control").change();
                     });
 
                     $(".show-control").on("change", function(){

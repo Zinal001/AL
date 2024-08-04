@@ -43,7 +43,7 @@ namespace MapGenerator.DB
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Zone>()
+            /*modelBuilder.Entity<Zone>()
                 .Property(x => x.Polygon)
                     .HasConversion<DBJsonConverter<List<DBPoint>>>();
             modelBuilder.Entity<MonsterZone>()
@@ -66,7 +66,7 @@ namespace MapGenerator.DB
                     .HasConversion<DBJsonConverter<List<Item>>>();
             modelBuilder.Entity<Spawn>()
                 .Property(x => x.Connections)
-                    .HasConversion<DBJsonConverter<List<String>>>();
+                    .HasConversion<DBJsonConverter<List<String>>>();*/
             modelBuilder.Entity<Door>()
                 .HasOne(e => e.ToMap)
                 .WithMany(e => e.Doors)

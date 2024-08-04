@@ -28,7 +28,9 @@ const dbClasses = {
     "Spawn": Spawn,
     "Zone": Zone,
     "MonsterZone": MonsterZone,
-    "Npc": Npc
+    "Npc": Npc,
+    "Boundary": Boundary,
+    "Position": Position
 };
 
 async function init()
@@ -94,7 +96,6 @@ async function map(name, serverId)
     {
         let map = new Map();
         populate(dbMap, map);
-
         return map;
     }
 
@@ -252,19 +253,34 @@ function fixObjJson(obj)
 {
     if("Boundary" in obj && obj.Boundary != null)
     {
-        if(obj.Boundary === 'null')
+        let dbB = obj.Boundary;
+        obj.Boundary = new Boundary();
+        populate(dbB, obj.Boundary);
+
+        /*if(obj.Boundary === 'null')
             obj.Boundary = null;
         else
         {
             let dbB = JSON.parse(obj.Boundary);
             obj.Boundary = new Boundary();
             populate(dbB, obj.Boundary);
-        }
+        }*/
     }
 
     if("Boundaries" in obj && obj.Boundaries != null)
     {
-        if(obj.Boundaries === "null")
+        let dbBounds = obj.Boundaries;
+        let bounds = [];
+        for(let dbB of dbBounds)
+        {
+            let b = new Boundary();
+            populate(dbB, b);
+            bounds.push(b);
+        }
+        obj.Boundaries = bounds;
+
+
+        /*if(obj.Boundaries === "null")
             obj.Boundaries = null;
         else
         {
@@ -277,24 +293,36 @@ function fixObjJson(obj)
                 bounds.push(b);
             }
             obj.Boundaries = bounds;
-        }
+        }*/
     }
 
     if("Position" in obj && obj.Position != null)
     {
-        if(obj.Position === "null")
+        let dbP = obj.Position;
+        obj.Position = new Position();
+        populate(dbP, obj.Position);
+        /*if(obj.Position === "null")
             obj.Position = null;
         else
         {
             let dbP = JSON.parse(obj.Position);
             obj.Position = new Position();
             populate(dbP, obj.Position);
-        }
+        }*/
     }
 
     if("Positions" in obj && obj.Positions != null)
     {
-        if(obj.Positions === "null")
+        let dbPos = obj.Positions;
+        let pos = [];
+        for(let dbP of dbPos)
+        {
+            let p = new Position();
+            populate(dbP, p);
+            pos.push(p);
+        }
+        obj.Positions = pos;
+        /*if(obj.Positions === "null")
             obj.Positions = null;
         else
         {
@@ -307,24 +335,36 @@ function fixObjJson(obj)
                 pos.push(p);
             }
             obj.Positions = pos;
-        }
+        }*/
     }
 
     if("TokenItem" in obj && obj.TokenItem != null)
     {
-        if(obj.TokenItem === "null")
+        let dbI = obj.TokenItem;
+        obj.TokenItem = new Item();
+        populate(dbI, obj.TokenItem);
+        /*if(obj.TokenItem === "null")
             obj.TokenItem = null;
         else
         {
             let dbI = JSON.parse(obj.TokenItem);
             obj.TokenItem = new Item();
             populate(dbI, obj.TokenItem);
-        }
+        */
     }
 
     if("Items" in obj && obj.Items != null)
     {
-        if(obj.Items === "null")
+        let dbItems = obj.Items;
+        let items = [];
+        for(let dbI of dbItems)
+        {
+            let i = new Item();
+            populate(dbI, i);
+            items.push(i);
+        }
+        obj.Items = items;
+        /*if(obj.Items === "null")
             obj.Items = null;
         else
         {
@@ -337,12 +377,21 @@ function fixObjJson(obj)
                 items.push(i);
             }
             obj.Items = items;
-        }
+        }*/
     }
 
     if("Polygon" in obj && obj.Polygon != null)
     {
-        if(obj.Polygon === "null")
+        let dbPolys = obj.Polygon;
+        let polys = [];
+        for(let dbPos of dbPolys)
+        {
+            let pos = new Position();
+            populate(dbPos, pos);
+            polys.push(pos);
+        }
+        obj.Polygon = polys;
+        /*if(obj.Polygon === "null")
             obj.Polygon = null;
         else
         {
@@ -355,18 +404,17 @@ function fixObjJson(obj)
                 polys.push(pos);
             }
             obj.Polygon = polys;
-        }
+        }*/
     }
-
-    if("Connections" in obj && obj.Connections != null)
-        obj.Connections = JSON.parse(obj.Connections);
-
-    if("Says" in obj && obj.Says != null)
-        obj.Says = JSON.parse(obj.Says);
 }
 
 function populate(dbObj, obj)
 {
+    if(dbObj == null)
+    {
+        obj = null;
+        return;
+    }
     let names = Object.getOwnPropertyNames(obj);
     for(let name of names)
     {
