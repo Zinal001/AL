@@ -397,5 +397,3 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /[Dd]ata
-/[Dd]ata/DB
-/[Dd]ata/Resources
